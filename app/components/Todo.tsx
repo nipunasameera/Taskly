@@ -7,6 +7,7 @@ import { Button } from './ui/Button';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import AddTodoDialog from './AddTodoDialog';
+import { useUser } from '@clerk/nextjs';
 
 interface TodoList {
   id: string;
@@ -42,6 +43,16 @@ export default function TodoList() {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState('all');
+  const { user } = useUser();
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
 
   const addTodo = (data: { text: string; dueDate: string; dueTime: string; listId: string }) => {
     setTodos([
@@ -180,6 +191,11 @@ export default function TodoList() {
         }`}
       >
         <div className="max-w-3xl mx-auto p-6">
+          <div className="mb-8 text-white text-center">
+            <h2 className="text-2xl font-semibold">
+              Welcome, {user?.firstName || 'User'} | {formatDate(new Date())}
+            </h2>
+          </div>
           <div className="mb-6">
             <Button 
               onClick={() => setIsDialogOpen(true)}
