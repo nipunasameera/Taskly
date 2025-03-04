@@ -8,6 +8,12 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import AddTodoDialog from './AddTodoDialog';
 
+interface TodoList {
+  id: string;
+  name: string;
+  icon: 'personal' | 'work';
+}
+
 interface Todo {
   id: string;
   text: string;
@@ -15,7 +21,13 @@ interface Todo {
   date: Date;
   dueDate: string;
   dueTime: string;
+  listId: string;
 }
+
+const defaultLists: TodoList[] = [
+  { id: 'personal', name: 'Personal', icon: 'personal' },
+  { id: 'work', name: 'Work', icon: 'work' },
+];
 
 interface GroupedTodos {
   [key: string]: {
@@ -26,11 +38,12 @@ interface GroupedTodos {
 
 export default function TodoList() {
   const [todos, setTodos] = React.useState<Todo[]>([]);
+  const [lists] = React.useState<TodoList[]>(defaultLists);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState('all');
 
-  const addTodo = (data: { text: string; dueDate: string; dueTime: string }) => {
+  const addTodo = (data: { text: string; dueDate: string; dueTime: string; listId: string }) => {
     setTodos([
       ...todos,
       {
@@ -40,6 +53,7 @@ export default function TodoList() {
         date: new Date(),
         dueDate: data.dueDate,
         dueTime: data.dueTime,
+        listId: data.listId,
       },
     ]);
   };
@@ -139,6 +153,10 @@ export default function TodoList() {
       case 'completed':
         filtered = todos.filter((todo) => todo.completed);
         break;
+      case 'personal':
+      case 'work':
+        filtered = todos.filter((todo) => todo.listId === activeTab);
+        break;
       default:
         filtered = todos;
     }
@@ -153,6 +171,7 @@ export default function TodoList() {
         isOpen={isSidebarOpen}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        lists={lists}
       />
       
       <main
@@ -194,11 +213,16 @@ export default function TodoList() {
                     </Checkbox.Root>
                     
                     <div className="flex-1">
-                      <p className={`text-white ${
-                        todo.completed ? 'line-through opacity-50' : ''
-                      }`}>
-                        {todo.text}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className={`text-white ${
+                          todo.completed ? 'line-through opacity-50' : ''
+                        }`}>
+                          {todo.text}
+                        </p>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/70">
+                          {lists.find(list => list.id === todo.listId)?.name}
+                        </span>
+                      </div>
                       <div className="flex items-center gap-4 mt-1">
                         <div className="flex items-center gap-1 text-white/70 text-sm">
                           <Clock className="w-4 h-4" />
@@ -233,6 +257,7 @@ export default function TodoList() {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSubmit={addTodo}
+        lists={lists}
       />
     </div>
   );
