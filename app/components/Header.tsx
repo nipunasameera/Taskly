@@ -1,8 +1,9 @@
 import React from 'react';
-import { Menu, Search, Bell } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { Button } from './ui/Button';
 import { UserButton } from '@clerk/nextjs';
 import SearchDialog from './SearchDialog';
+import NotificationsDropdown from './NotificationsDropdown';
 import { type Todo } from '@/app/lib/supabase';
 
 interface HeaderProps {
@@ -35,13 +36,7 @@ export default function Header({ onMenuClick, todos, onTodoClick }: HeaderProps)
           >
             <Search className="h-5 w-5" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="text-white hover:bg-white/20"
-          >
-            <Bell className="h-5 w-5" />
-          </Button>
+          <NotificationsDropdown todos={todos} onTodoClick={onTodoClick} />
           <UserButton 
             afterSignOutUrl="/auth" 
             appearance={{
