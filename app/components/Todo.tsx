@@ -2,7 +2,7 @@
 
 import React from 'react';
 import * as Checkbox from '@radix-ui/react-checkbox';
-import { Check, Plus, Trash2, Calendar, Clock } from 'lucide-react';
+import { Check, Plus, Trash2, Clock } from 'lucide-react';
 import { Button } from './ui/Button';
 import Header from './Header';
 import Sidebar from './Sidebar';
