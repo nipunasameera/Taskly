@@ -16,7 +16,7 @@ interface TodoList {
 }
 
 const tabs = [
-  { id: 'all', label: 'All', icon: ListTodo },
+  { id: 'all', label: 'All Tasks', icon: ListTodo },
   { id: 'today', label: 'Today', icon: Clock },
   { id: 'upcoming', label: 'Upcoming', icon: Calendar },
   { id: 'completed', label: 'Completed', icon: CheckCircle },

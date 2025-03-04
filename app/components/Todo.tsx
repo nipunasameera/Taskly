@@ -36,6 +36,11 @@ export default function TodoList() {
   const [activeTab, setActiveTab] = React.useState('all');
   const { user } = useUser();
 
+  // Reset to 'all' tab when user changes
+  React.useEffect(() => {
+    setActiveTab('all');
+  }, [user?.id]);
+
   // Fetch todos on component mount and when user changes
   React.useEffect(() => {
     if (user?.id) {
@@ -202,8 +207,9 @@ export default function TodoList() {
       case 'work':
         filtered = todos.filter((todo) => todo.list_id === activeTab);
         break;
+      case 'all':
       default:
-        filtered = todos;
+        filtered = todos;  // Show all todos for 'all' tab
     }
 
     return groupTodosByDate(filtered);
