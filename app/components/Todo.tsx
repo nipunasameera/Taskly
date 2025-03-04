@@ -62,6 +62,7 @@ export default function TodoList() {
     });
   };
 
+  // Handle adding a new todo
   const handleAddTodo = async (data: { text: string; dueDate: string; dueTime: string; listId: string }) => {
     if (!user?.id) {
       console.error('No user ID available');
@@ -91,7 +92,6 @@ export default function TodoList() {
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Failed to add todo:', error);
-      // You might want to show an error message to the user here
     }
   };
 
@@ -106,7 +106,6 @@ export default function TodoList() {
       );
     } catch (error) {
       console.error('Failed to toggle todo:', error);
-      // You might want to show an error message to the user here
     }
   };
 
@@ -116,7 +115,6 @@ export default function TodoList() {
       setTodos(prev => prev.filter(todo => todo.id !== id));
     } catch (error) {
       console.error('Failed to delete todo:', error);
-      // You might want to show an error message to the user here
     }
   };
 
@@ -224,7 +222,8 @@ export default function TodoList() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
+    
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
       <Header 
         onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
         todos={todos}
@@ -268,7 +267,7 @@ export default function TodoList() {
                 {group.todos.map((todo) => (
                   <div
                     key={todo.id}
-                    className="flex items-center gap-2 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10"
+                    className="flex items-center gap-5 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10"
                   >
                     <Checkbox.Root
                       checked={todo.completed}

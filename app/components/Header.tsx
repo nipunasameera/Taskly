@@ -18,6 +18,7 @@ export default function Header({ onMenuClick, todos, onTodoClick }: HeaderProps)
   return (
     <>
       <header className="h-16 border-b border-white/10 flex items-center justify-between px-4 bg-white/10 backdrop-blur-md fixed w-full top-0 z-50">
+        {/* Menu Button*/}
         <Button 
           variant="ghost" 
           size="icon" 
@@ -27,7 +28,10 @@ export default function Header({ onMenuClick, todos, onTodoClick }: HeaderProps)
           <Menu className="h-5 w-5" />
         </Button>
         
-        <div className="flex items-center gap-2">
+        {/* Search and Notifications */}
+        <div className="flex items-center gap-6">
+
+          {/* Search Button*/}
           <Button 
             variant="ghost" 
             size="icon"
@@ -36,7 +40,11 @@ export default function Header({ onMenuClick, todos, onTodoClick }: HeaderProps)
           >
             <Search className="h-5 w-5" />
           </Button>
+
+          {/* Notifications Button*/}
           <NotificationsDropdown todos={todos} onTodoClick={onTodoClick} />
+
+          {/* User Button*/}
           <UserButton 
             afterSignOutUrl="/auth" 
             appearance={{

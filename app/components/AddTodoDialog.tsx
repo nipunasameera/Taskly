@@ -4,12 +4,14 @@ import * as Select from '@radix-ui/react-select';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { Button } from './ui/Button';
 
+// A dialog component for adding a new todo
 interface TodoList {
   id: string;
   name: string;
   icon: 'personal' | 'work';
 }
 
+// Props for the AddTodoDialog component
 interface AddTodoDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,12 +19,14 @@ interface AddTodoDialogProps {
   lists: TodoList[];
 }
 
+// The AddTodoDialog component
 export default function AddTodoDialog({ isOpen, onClose, onSubmit, lists }: AddTodoDialogProps) {
   const [text, setText] = React.useState('');
   const [dueDate, setDueDate] = React.useState('');
   const [dueTime, setDueTime] = React.useState('');
   const [selectedList, setSelectedList] = React.useState(lists[0]?.id || '');
 
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({ text, dueDate, dueTime, listId: selectedList });
