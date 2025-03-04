@@ -215,9 +215,21 @@ export default function TodoList() {
     return groupTodosByDate(filtered);
   }, [todos, activeTab]);
 
+  const handleTodoClick = (todo: DBTodo) => {
+    // Scroll to the todo's date section
+    const dateSection = document.getElementById(`date-${todo.due_date}`);
+    if (dateSection) {
+      dateSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400">
-      <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <Header 
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+        todos={todos}
+        onTodoClick={handleTodoClick}
+      />
       <Sidebar
         isOpen={isSidebarOpen}
         activeTab={activeTab}
@@ -249,7 +261,7 @@ export default function TodoList() {
 
           <div className="space-y-8">
             {Object.entries(filteredTodos).map(([date, group]) => (
-              <div key={date} className="space-y-2">
+              <div key={date} id={`date-${date}`} className="space-y-2">
                 <h2 className="text-white text-lg font-semibold mb-3">
                   {group.title}
                 </h2>
