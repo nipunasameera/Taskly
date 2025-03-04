@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, Search, Bell } from 'lucide-react';
 import { Button } from './ui/Button';
+import { UserButton } from '@clerk/nextjs';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -33,6 +34,20 @@ export default function Header({ onMenuClick }: HeaderProps) {
         >
           <Bell className="h-5 w-5" />
         </Button>
+        <UserButton 
+          afterSignOutUrl="/auth" 
+          appearance={{
+            elements: {
+              userButtonAvatarBox: "w-9 h-9",
+              userButtonTrigger: "hover:bg-white/20 rounded-md p-0.5",
+              userButtonPopoverCard: "bg-white/10 backdrop-blur-md border border-white/10",
+              userButtonPopoverFooter: "border-t border-white/10",
+              userPreviewMainIdentifier: "text-white",
+              userPreviewSecondaryIdentifier: "text-white/70",
+              userButtonBox: "border-2 border-white/20 rounded-full"
+            }
+          }} 
+        />
       </div>
     </header>
   );
