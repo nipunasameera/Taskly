@@ -1,5 +1,6 @@
 import { SignUp } from "@clerk/nextjs";
 
+// Sign up page
 export default function SignUpPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 flex items-center justify-center">

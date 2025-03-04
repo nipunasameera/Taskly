@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, CheckCircle, Clock, ListTodo, Briefcase, User } from 'lucide-react';
 import { cn } from '@/app/lib/utils';
 
+// Props for the Sidebar component
 interface SidebarProps {
   isOpen: boolean;
   activeTab: string;
@@ -9,12 +10,14 @@ interface SidebarProps {
   lists: TodoList[];
 }
 
+// Props for the Sidebar component
 interface TodoList {
   id: string;
   name: string;
   icon: 'personal' | 'work';
 }
 
+// The sidebar component
 const tabs = [
   { id: 'all', label: 'All Tasks', icon: ListTodo },
   { id: 'today', label: 'Today', icon: Clock },
@@ -22,6 +25,7 @@ const tabs = [
   { id: 'completed', label: 'Completed', icon: CheckCircle },
 ];
 
+// Utility function to get the icon for a list
 const getListIcon = (icon: 'personal' | 'work') => {
   switch (icon) {
     case 'personal':

@@ -63,7 +63,7 @@ export default function NotificationsDropdown({ todos, onTodoClick }: Notificati
 
       <Popover.Portal>
         <Popover.Content
-          className="w-80 bg-white/10 backdrop-blur-md border border-white/10 rounded-lg shadow-xl p-4 text-white"
+          className="w-80 bg-white/10 backdrop-blur-md border border-white/10 rounded-lg shadow-xl p-4 text-white mt-2"
           align="end"
           sideOffset={5}
         >

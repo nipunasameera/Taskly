@@ -18,6 +18,7 @@ const VisuallyHidden = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
+// The SearchDialog component
 export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: SearchDialogProps) {
   const [searchQuery, setSearchQuery] = React.useState('');
   
@@ -29,6 +30,7 @@ export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: Se
     );
   }, [todos, searchQuery]);
 
+  // Format the time for display
   const formatTime = (time: string) => {
     return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
       hour: 'numeric',
@@ -36,6 +38,7 @@ export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: Se
     });
   };
 
+  // Format the date for display
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -47,7 +50,7 @@ export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: Se
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
-        <Dialog.Content className="fixed left-1/2 top-24 -translate-x-1/2 w-full max-w-2xl bg-white/10 backdrop-blur-md border border-white/10 rounded-lg p-6 text-white shadow-xl">
+        <Dialog.Content className="fixed left-1/2 top-24 -translate-x-1/2 w-full max-w-2xl bg-white/10 backdrop-blur-md border border-white/10 rounded-lg p-6 text-white shadow-xl pt-12">
           <Dialog.Title className="sr-only">
             Search Todos
           </Dialog.Title>
