@@ -8,21 +8,12 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import AddTodoDialog from './AddTodoDialog';
 import { useUser } from '@clerk/nextjs';
+import { addTodo, getTodos, updateTodo, deleteTodo, type Todo as DBTodo } from '@/app/lib/supabase';
 
 interface TodoList {
   id: string;
   name: string;
   icon: 'personal' | 'work';
-}
-
-interface Todo {
-  id: string;
-  text: string;
-  completed: boolean;
-  date: Date;
-  dueDate: string;
-  dueTime: string;
-  listId: string;
 }
 
 const defaultLists: TodoList[] = [
@@ -33,17 +24,29 @@ const defaultLists: TodoList[] = [
 interface GroupedTodos {
   [key: string]: {
     title: string;
-    todos: Todo[];
+    todos: DBTodo[];
   };
 }
 
 export default function TodoList() {
-  const [todos, setTodos] = React.useState<Todo[]>([]);
+  const [todos, setTodos] = React.useState<DBTodo[]>([]);
   const [lists] = React.useState<TodoList[]>(defaultLists);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState('all');
   const { user } = useUser();
+
+  // Fetch todos on component mount and when user changes
+  React.useEffect(() => {
+    if (user?.id) {
+      getTodos(user.id)
+        .then(setTodos)
+        .catch((error) => {
+          console.error('Failed to fetch todos:', error);
+          // You might want to show an error message to the user here
+        });
+    }
+  }, [user?.id]);
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
@@ -54,31 +57,62 @@ export default function TodoList() {
     });
   };
 
-  const addTodo = (data: { text: string; dueDate: string; dueTime: string; listId: string }) => {
-    setTodos([
-      ...todos,
-      {
-        id: Math.random().toString(36).substring(7),
+  const handleAddTodo = async (data: { text: string; dueDate: string; dueTime: string; listId: string }) => {
+    if (!user?.id) {
+      console.error('No user ID available');
+      return;
+    }
+
+    try {
+      console.log('Adding todo with data:', {
+        owner_id: user.id,
         text: data.text,
-        completed: false,
-        date: new Date(),
-        dueDate: data.dueDate,
-        dueTime: data.dueTime,
-        listId: data.listId,
-      },
-    ]);
+        list_id: data.listId,
+        due_date: data.dueDate,
+        due_time: data.dueTime,
+        completed: false
+      });
+
+      const newTodo = await addTodo({
+        owner_id: user.id,
+        text: data.text,
+        list_id: data.listId,
+        due_date: data.dueDate,
+        due_time: data.dueTime,
+        completed: false
+      });
+
+      setTodos(prev => [...prev, newTodo]);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to add todo:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
-  const toggleTodo = (id: string) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const handleToggleTodo = async (todo: DBTodo) => {
+    try {
+      const updatedTodo = await updateTodo(todo.id, {
+        completed: !todo.completed
+      });
+
+      setTodos(prev =>
+        prev.map(t => t.id === updatedTodo.id ? updatedTodo : t)
+      );
+    } catch (error) {
+      console.error('Failed to toggle todo:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  const handleDeleteTodo = async (id: string) => {
+    try {
+      await deleteTodo(id);
+      setTodos(prev => prev.filter(todo => todo.id !== id));
+    } catch (error) {
+      console.error('Failed to delete todo:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const formatTime = (time: string) => {
@@ -111,9 +145,9 @@ export default function TodoList() {
     }
   };
 
-  const groupTodosByDate = (todos: Todo[]) => {
+  const groupTodosByDate = (todos: DBTodo[]) => {
     const grouped = todos.reduce((acc: GroupedTodos, todo) => {
-      const dateKey = todo.dueDate;
+      const dateKey = todo.due_date;
       const dateTitle = getDateTitle(dateKey);
 
       if (!acc[dateKey]) {
@@ -129,7 +163,7 @@ export default function TodoList() {
 
     // Sort todos within each group by time
     Object.values(grouped).forEach((group) => {
-      group.todos.sort((a, b) => a.dueTime.localeCompare(b.dueTime));
+      group.todos.sort((a, b) => a.due_time.localeCompare(b.due_time));
     });
 
     // Sort groups by date
@@ -145,18 +179,18 @@ export default function TodoList() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    let filtered: Todo[];
+    let filtered: DBTodo[];
     switch (activeTab) {
       case 'today':
         filtered = todos.filter((todo) => {
-          const dueDate = new Date(todo.dueDate);
+          const dueDate = new Date(todo.due_date);
           dueDate.setHours(0, 0, 0, 0);
           return dueDate.getTime() === today.getTime();
         });
         break;
       case 'upcoming':
         filtered = todos.filter((todo) => {
-          const dueDate = new Date(todo.dueDate);
+          const dueDate = new Date(todo.due_date);
           dueDate.setHours(0, 0, 0, 0);
           return dueDate.getTime() > today.getTime();
         });
@@ -166,7 +200,7 @@ export default function TodoList() {
         break;
       case 'personal':
       case 'work':
-        filtered = todos.filter((todo) => todo.listId === activeTab);
+        filtered = todos.filter((todo) => todo.list_id === activeTab);
         break;
       default:
         filtered = todos;
@@ -220,7 +254,7 @@ export default function TodoList() {
                   >
                     <Checkbox.Root
                       checked={todo.completed}
-                      onCheckedChange={() => toggleTodo(todo.id)}
+                      onCheckedChange={() => handleToggleTodo(todo)}
                       className="w-6 h-6 flex items-center justify-center rounded border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 data-[state=checked]:bg-white/20 data-[state=checked]:border-white/50"
                     >
                       <Checkbox.Indicator>
@@ -236,13 +270,13 @@ export default function TodoList() {
                           {todo.text}
                         </p>
                         <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/70">
-                          {lists.find(list => list.id === todo.listId)?.name}
+                          {lists.find(list => list.id === todo.list_id)?.name}
                         </span>
                       </div>
                       <div className="flex items-center gap-4 mt-1">
                         <div className="flex items-center gap-1 text-white/70 text-sm">
                           <Clock className="w-4 h-4" />
-                          <span>{formatTime(todo.dueTime)}</span>
+                          <span>{formatTime(todo.due_time)}</span>
                         </div>
                       </div>
                     </div>
@@ -250,7 +284,7 @@ export default function TodoList() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => deleteTodo(todo.id)}
+                      onClick={() => handleDeleteTodo(todo.id)}
                       className="text-white/70 hover:text-white hover:bg-white/20"
                     >
                       <Trash2 className="w-5 h-5" />
@@ -272,7 +306,7 @@ export default function TodoList() {
       <AddTodoDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onSubmit={addTodo}
+        onSubmit={handleAddTodo}
         lists={lists}
       />
     </div>
