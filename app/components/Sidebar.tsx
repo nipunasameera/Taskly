@@ -7,6 +7,7 @@ interface SidebarProps {
   isOpen: boolean;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onClose: () => void;
   lists: TodoList[];
 }
 
@@ -37,11 +38,17 @@ const getListIcon = (icon: 'personal' | 'work') => {
   }
 };
 
-export default function Sidebar({ isOpen, activeTab, onTabChange, lists }: SidebarProps) {
+export default function Sidebar({ isOpen, activeTab, onTabChange, lists, onClose }: SidebarProps) {
   return (
+    <>
+    {/* Overlay For Mobile */}
+    {isOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={onClose} />
+    )}
+
     <aside
       className={cn(
-        'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white/10 backdrop-blur-md border-r border-white/10 transition-all duration-300 ease-in-out',
+        'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white/10 backdrop-blur-md border-r border-white/10 transition-all duration-300 ease-in-out z-100',
         isOpen ? 'w-64 translate-x-0' : 'w-64 -translate-x-full'
       )}
     >
@@ -94,5 +101,6 @@ export default function Sidebar({ isOpen, activeTab, onTabChange, lists }: Sideb
         </div>
       </nav>
     </aside>
+    </>
   );
 } 
