@@ -233,17 +233,18 @@ export default function TodoList() {
         isOpen={isSidebarOpen}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onClose={() => setIsSidebarOpen(false)}
         lists={lists}
       />
       
       <main
-        className={`transition-all duration-300 ease-in-out pt-20 ${
+        className={`transition-all duration-300 ease-in-out pt-6 ${
           isSidebarOpen ? 'ml-64' : 'ml-0'
         }`}
       >
-        <div className="max-w-3xl mx-auto p-6">
+        <div className="max-w-3xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 flex flex-col justify-center p-6">
           <div className="mb-8 text-white text-center">
-            <h2 className="text-2xl font-semibold">
+            <h2 className="lg:text-3xl sm:text-2xl font-semibold">
               Welcome, {user?.firstName || 'User'} | {formatDate(new Date())}
             </h2>
           </div>
@@ -258,10 +259,10 @@ export default function TodoList() {
             </Button>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {Object.entries(filteredTodos).map(([date, group]) => (
               <div key={date} id={`date-${date}`} className="space-y-2">
-                <h2 className="text-white text-lg font-semibold mb-3">
+                <h2 className="text-white text-base sm:text-lg font-semibold mb-3">
                   {group.title}
                 </h2>
                 {group.todos.map((todo) => (
@@ -279,8 +280,8 @@ export default function TodoList() {
                       </Checkbox.Indicator>
                     </Checkbox.Root>
                     
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className={`text-white ${
                           todo.completed ? 'line-through opacity-50' : ''
                         }`}>
