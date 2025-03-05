@@ -1,7 +1,6 @@
 import React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Search, X, Clock } from 'lucide-react';
-import { Button } from './ui/Button';
 import { type Todo } from '@/app/lib/supabase';
 
 interface SearchDialogProps {
@@ -12,11 +11,11 @@ interface SearchDialogProps {
 }
 
 // Utility component for visually hidden elements
-const VisuallyHidden = ({ children }: { children: React.ReactNode }) => (
-  <span className="absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0">
-    {children}
-  </span>
-);
+// const VisuallyHidden = ({ children }: { children: React.ReactNode }) => (
+//   <span className="absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0">
+//     {children}
+//   </span>
+// );
 
 // The SearchDialog component
 export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: SearchDialogProps) {
@@ -93,7 +92,7 @@ export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: Se
 
             {searchQuery.trim() && filteredTodos.length === 0 && (
               <p className="text-center text-white/50 py-4">
-                No todos found matching "{searchQuery}"
+                No todos found matching &quot;{searchQuery}&quot;
               </p>
             )}
 
