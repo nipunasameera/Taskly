@@ -9,6 +9,7 @@ interface SidebarProps {
   onTabChange: (tab: string) => void;
   onClose: () => void;
   lists: TodoList[];
+  tags: Tag[];
 }
 
 // Props for the Sidebar component
@@ -16,6 +17,13 @@ interface TodoList {
   id: string;
   name: string;
   icon: 'personal' | 'work';
+}
+
+// Define the Tag interface
+interface Tag{
+  id: string;
+  name: string;
+  color: string;
 }
 
 // The sidebar component
@@ -38,7 +46,7 @@ const getListIcon = (icon: 'personal' | 'work') => {
   }
 };
 
-export default function Sidebar({ isOpen, activeTab, onTabChange, lists, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, activeTab, onTabChange, lists, tags, onClose }: SidebarProps) {
   return (
     <>
     {/* Overlay For Mobile */}
@@ -99,6 +107,31 @@ export default function Sidebar({ isOpen, activeTab, onTabChange, lists, onClose
             })}
           </ul>
         </div>
+
+        <div>
+            <h3 className="text-white/70 font-medium px-4 mb-2 text-sm">TAGS</h3>
+            <ul className="space-y-2">
+              {tags.map((tag) => {
+                return (
+                  <li key={tag.id}>
+                    <button
+                      onClick={() => onTabChange(tag.id)}
+                      className={cn(
+                        'w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-white',
+                        activeTab === tag.id
+                          ? 'bg-white/20'
+                          : 'hover:bg-white/10'
+                      )}
+                    >
+                      <div className="w-5 h-5 rounded-[25%]" style={{ backgroundColor: tag.color }}></div>
+                      <span>{tag.name}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        
       </nav>
     </aside>
     </>

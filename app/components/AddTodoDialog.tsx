@@ -3,6 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { Button } from './ui/Button';
+import { cn } from '@/app/lib/utils';
 
 // A dialog component for adding a new todo
 interface TodoList {
@@ -11,11 +12,24 @@ interface TodoList {
   icon: 'personal' | 'work';
 }
 
+// Define the Tag interface
+interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+const defaultTags: Tag[] = [
+  { id: 'Priority_1', name: '#important', color: 'red' },
+  { id: 'Priority_2', name: '#urgent', color: 'orange' },
+  { id: 'Priority_3', name: '#routine', color: 'green' },
+];
+
 // Props for the AddTodoDialog component
 interface AddTodoDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { text: string; dueDate: string; dueTime: string; listId: string }) => void;
+  onSubmit: (data: { text: string; dueDate: string; dueTime: string; listId: string; tags: string[] }) => void;
   lists: TodoList[];
 }
 
@@ -25,16 +39,25 @@ export default function AddTodoDialog({ isOpen, onClose, onSubmit, lists }: AddT
   const [dueDate, setDueDate] = React.useState('');
   const [dueTime, setDueTime] = React.useState('');
   const [selectedList, setSelectedList] = React.useState(lists[0]?.id || '');
+  const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ text, dueDate, dueTime, listId: selectedList });
+    onSubmit({ text, dueDate, dueTime, listId: selectedList, tags: selectedTags });
     setText('');
     setDueDate('');
     setDueTime('');
     setSelectedList(lists[0]?.id || '');
     onClose();
+  };
+
+  const toggleTag = (tagId: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) 
+        ? prev.filter(id => id !== tagId) 
+        : [...prev, tagId]
+    );
   };
 
   return (
@@ -97,6 +120,30 @@ export default function AddTodoDialog({ isOpen, onClose, onSubmit, lists }: AddT
                   </Select.Content>
                 </Select.Portal>
               </Select.Root>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm">
+                Tags
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {defaultTags.map((tag) => (
+                  <div 
+                    key={tag.id} 
+                    style={{
+                      backgroundColor: selectedTags.includes(tag.id) ? tag.color : 'rgba(255, 255, 255, 0.1)',
+                      borderColor: selectedTags.includes(tag.id) ? tag.color : 'rgba(255, 255, 255, 0.1)'
+                    }}
+                    className={cn(
+                      'flex items-center justify-center w-auto h-auto pt-1 pb-1 pl-2 pr-2 rounded-[8%] cursor-pointer transition-colors duration-200',
+                      selectedTags.includes(tag.id) ? 'text-white' : 'text-white/90'
+                    )} 
+                    onClick={() => toggleTag(tag.id)}
+                  >
+                    <p>{tag.name}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">

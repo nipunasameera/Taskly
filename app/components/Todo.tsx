@@ -10,15 +10,31 @@ import AddTodoDialog from './AddTodoDialog';
 import { useUser } from '@clerk/nextjs';
 import { addTodo, getTodos, updateTodo, deleteTodo, type Todo as DBTodo } from '@/app/lib/supabase';
 
+// Define the TodoList interface
 interface TodoList {
   id: string;
   name: string;
   icon: 'personal' | 'work';
 }
 
+// Define the Tag interface
+interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+// Define the default lists
 const defaultLists: TodoList[] = [
   { id: 'personal', name: 'Personal', icon: 'personal' },
   { id: 'work', name: 'Work', icon: 'work' },
+];
+
+// Define the default tags
+const defaultTags: Tag[] = [
+  { id: 'Priority_1', name: '#important', color: 'Red' },
+  { id: 'Priority_2', name: '#urgent', color: 'Orange' },
+  { id: 'Priority_3', name: '#routine', color: 'Green' },
 ];
 
 interface GroupedTodos {
@@ -31,6 +47,7 @@ interface GroupedTodos {
 export default function TodoList() {
   const [todos, setTodos] = React.useState<DBTodo[]>([]);
   const [lists] = React.useState<TodoList[]>(defaultLists);
+  const [tags] = React.useState<Tag[]>(defaultTags);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [activeTab, setActiveTab] = React.useState('all');
@@ -48,7 +65,6 @@ export default function TodoList() {
         .then(setTodos)
         .catch((error) => {
           console.error('Failed to fetch todos:', error);
-          // You might want to show an error message to the user here
         });
     }
   }, [user?.id]);
@@ -63,7 +79,7 @@ export default function TodoList() {
   };
 
   // Handle adding a new todo
-  const handleAddTodo = async (data: { text: string; dueDate: string; dueTime: string; listId: string }) => {
+  const handleAddTodo = async (data: { text: string; dueDate: string; dueTime: string; listId: string; tags: string[] }) => {
     if (!user?.id) {
       console.error('No user ID available');
       return;
@@ -85,7 +101,8 @@ export default function TodoList() {
         list_id: data.listId,
         due_date: data.dueDate,
         due_time: data.dueTime,
-        completed: false
+        completed: false,
+        tags: data.tags
       });
 
       setTodos(prev => [...prev, newTodo]);
@@ -205,6 +222,11 @@ export default function TodoList() {
       case 'work':
         filtered = todos.filter((todo) => todo.list_id === activeTab);
         break;
+      case 'Priority_1':
+      case 'Priority_2':
+      case 'Priority_3':
+        filtered = todos.filter((todo) => todo.tags?.includes(activeTab));
+        break;
       case 'all':
       default:
         filtered = todos;  // Show all todos for 'all' tab
@@ -235,6 +257,7 @@ export default function TodoList() {
         onTabChange={setActiveTab}
         onClose={() => setIsSidebarOpen(false)}
         lists={lists}
+        tags={tags}
       />
       
       <main
@@ -298,6 +321,17 @@ export default function TodoList() {
                         </div>
                       </div>
                     </div>
+
+                    <div className="flex flex-row bottom-0 left-0 transition-all duration-300 group-hover:opacity-100 group-hover:max-h-24 opacity-0 max-h-0 overflow-hidden ease-in-out transform -translate-y-5 group-hover:translate-y-0">
+                          { todo.tags ? todo.tags.map((tag) => {
+                            return (
+                              
+                              <span key={tag} className={`text-xs px-3 py-0.5 rounded-[8%] mt-2 mr-2 text-white/70`} style={{backgroundColor: defaultTags.find(t => t.id === tag)?.color}}>
+                                {defaultTags.find(t => t.id === tag)?.name}
+                              </span>
+                            )
+                          }) : null}
+                      </div>
                     
                     <Button
                       variant="ghost"
