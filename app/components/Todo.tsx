@@ -289,23 +289,24 @@ export default function TodoList() {
                   {group.title}
                 </h2>
                 {group.todos.map((todo) => (
+
                   <div
                     key={todo.id}
-                    className="flex items-center gap-5 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10"
+                    className="flex items-center gap-5 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-colors duration-200 group overflow-hidden"
                   >
                     <Checkbox.Root
                       checked={todo.completed}
                       onCheckedChange={() => handleToggleTodo(todo)}
-                      className="w-6 h-6 flex items-center justify-center rounded border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 data-[state=checked]:bg-white/20 data-[state=checked]:border-white/50"
+                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 data-[state=checked]:bg-white/20 data-[state=checked]:border-white/50"
                     >
                       <Checkbox.Indicator>
-                        <Check className="w-4 h-4 text-white" />
+                        <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                       </Checkbox.Indicator>
                     </Checkbox.Root>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className={`text-white ${
+                        <p className={`text-white text-sm sm:text-base ${
                           todo.completed ? 'line-through opacity-50' : ''
                         }`}>
                           {todo.text}
@@ -315,14 +316,13 @@ export default function TodoList() {
                         </span>
                       </div>
                       <div className="flex items-center gap-4 mt-1">
-                        <div className="flex items-center gap-1 text-white/70 text-sm">
-                          <Clock className="w-4 h-4" />
+                        <div className="flex items-center gap-1 text-white/70 text-xs sm:text-sm">
+                          <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                           <span>{formatTime(todo.due_time)}</span>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex flex-row bottom-0 left-0 transition-all duration-300 group-hover:opacity-100 group-hover:max-h-24 opacity-0 max-h-0 overflow-hidden ease-in-out transform -translate-y-5 group-hover:translate-y-0">
+                      <div className="flex flex-row bottom-0 left-0 transition-all duration-300 group-hover:opacity-100 group-hover:max-h-24 opacity-0 max-h-0 overflow-hidden ease-in-out transform -translate-y-5 group-hover:translate-y-0">
                           { todo.tags ? todo.tags.map((tag) => {
                             return (
                               
@@ -332,6 +332,8 @@ export default function TodoList() {
                             )
                           }) : null}
                       </div>
+
+                    </div>
                     
                     <Button
                       variant="ghost"
@@ -339,7 +341,7 @@ export default function TodoList() {
                       onClick={() => handleDeleteTodo(todo.id)}
                       className="text-white/70 hover:text-white hover:bg-white/20"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </Button>
                   </div>
                 ))}
