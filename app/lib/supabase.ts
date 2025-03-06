@@ -20,6 +20,7 @@ export interface Todo {
   completed: boolean;
   created_at: string;
   updated_at: string;
+  tags: string[];
 }
 
 export async function addTodo(todo: Omit<Todo, 'id' | 'created_at' | 'updated_at'>) {
