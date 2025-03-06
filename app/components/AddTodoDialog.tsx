@@ -20,9 +20,9 @@ interface Tag {
 }
 
 const defaultTags: Tag[] = [
-  { id: 'Priority_1', name: '#important', color: 'red' },
-  { id: 'Priority_2', name: '#urgent', color: 'orange' },
-  { id: 'Priority_3', name: '#routine', color: 'green' },
+  { id: 'Priority_1', name: '#important', color: '#F59E0B' },
+  { id: 'Priority_2', name: '#urgent', color: '#DC2626' },
+  { id: 'Priority_3', name: '#routine', color: '#22C55E' },
 ];
 
 // Props for the AddTodoDialog component

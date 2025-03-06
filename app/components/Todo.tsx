@@ -32,9 +32,9 @@ const defaultLists: TodoList[] = [
 
 // Define the default tags
 const defaultTags: Tag[] = [
-  { id: 'Priority_1', name: '#important', color: 'Red' },
-  { id: 'Priority_2', name: '#urgent', color: 'Orange' },
-  { id: 'Priority_3', name: '#routine', color: 'Green' },
+  { id: 'Priority_1', name: '#important', color: '#F59E0B' },
+  { id: 'Priority_2', name: '#urgent', color: '#DC2626' },
+  { id: 'Priority_3', name: '#routine', color: '#22C55E' },
 ];
 
 interface GroupedTodos {
