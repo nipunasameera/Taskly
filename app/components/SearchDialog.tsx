@@ -2,6 +2,7 @@ import React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Search, X, Clock } from 'lucide-react';
 import { type Todo } from '@/app/lib/supabase';
+import { cn } from '@/app/lib/utils';
 
 interface SearchDialogProps {
   isOpen: boolean;
@@ -10,17 +11,26 @@ interface SearchDialogProps {
   onTodoClick: (todo: Todo) => void;
 }
 
-// Utility component for visually hidden elements
-// const VisuallyHidden = ({ children }: { children: React.ReactNode }) => (
-//   <span className="absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0">
-//     {children}
-//   </span>
-// );
+// Define the Tag interface
+interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+// Define the default tags
+const defaultTags: Tag[] = [
+  { id: 'Priority_1', name: '#important', color: '#F59E0B' },
+  { id: 'Priority_2', name: '#urgent', color: '#DC2626' },
+  { id: 'Priority_3', name: '#routine', color: '#22C55E' },
+];
 
 // The SearchDialog component
 export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: SearchDialogProps) {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
   
+  // Filter the todos by the search query
   const filteredTodos = React.useMemo(() => {
     if (!searchQuery.trim()) return [];
     
@@ -28,6 +38,15 @@ export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: Se
       todo.text.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [todos, searchQuery]);
+
+  // Filter the todos by the selected tags
+  const filteredTodosByTags = React.useMemo(() => {
+    if (!selectedTags.length) return filteredTodos;
+    
+    return todos.filter(todo => 
+      todo.tags?.some(tag => selectedTags.includes(tag))
+    );
+  }, [filteredTodos, selectedTags]);
 
   // Format the time for display
   const formatTime = (time: string) => {
@@ -43,6 +62,15 @@ export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: Se
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  // Toggle the selected tag
+  const toggleTag = (tagId: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) 
+        ? prev.filter(id => id !== tagId) 
+        : [...prev, tagId]
+    );
   };
 
   return (
@@ -66,8 +94,57 @@ export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: Se
             />
           </div>
 
-          <div className="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
-            {filteredTodos.map((todo) => (
+          <div className="flex flex-wrap gap-3 mt-3">
+                {defaultTags.map((tag) => (
+                  <div 
+                    key={tag.id} 
+                    style={{
+                      backgroundColor: selectedTags.includes(tag.id) ? tag.color : 'rgba(255, 255, 255, 0.1)',
+                      borderColor: selectedTags.includes(tag.id) ? tag.color : 'rgba(255, 255, 255, 0.1)'
+                    }}
+                    className={cn(
+                      'flex items-center justify-center w-auto h-auto pt-1 pb-1 pl-2 pr-2 rounded-[8%] cursor-pointer transition-colors duration-200',
+                      selectedTags.includes(tag.id) ? 'text-white' : 'text-white/90'
+                    )} 
+                    onClick={() => toggleTag(tag.id)}
+                  >
+                    <p>{tag.name}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
+            { filteredTodosByTags.length > 0 ? 
+            filteredTodosByTags.map((todo) => (
+
+              <button
+                key={todo.id}
+                onClick={() => {
+                  onTodoClick(todo);
+                  onClose();
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-white/5 transition-colors text-left"
+              >
+                <div className="flex-1">
+                  <p className={todo.completed ? 'line-through text-white/50' : 'text-white'}>
+                    {todo.text}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1 text-sm text-white/70">
+                  <div className="flex flex-row items-center justify-center gap-1">
+                    {todo.tags?.map((tag) => (
+                      <div key={tag} className="w-2 h-2 rounded-full" style={{backgroundColor: defaultTags.find(t => t.id === tag)?.color}}></div>
+                    ))}
+                  </div>
+                  
+                    <Clock className="w-4 h-4" />
+                    <span>{formatTime(todo.due_time)}</span>
+                    <span>•</span>
+                    <span>{formatDate(todo.due_date)}</span>
+                  </div>
+                </div>
+              </button>
+            )): filteredTodos.map((todo) => (
+
               <button
                 key={todo.id}
                 onClick={() => {
@@ -90,13 +167,13 @@ export default function SearchDialog({ isOpen, onClose, todos, onTodoClick }: Se
               </button>
             ))}
 
-            {searchQuery.trim() && filteredTodos.length === 0 && (
+            {searchQuery.trim() && filteredTodos.length === 0 && filteredTodosByTags.length === 0 && (
               <p className="text-center text-white/50 py-4">
                 No todos found matching &quot;{searchQuery}&quot;
               </p>
             )}
 
-            {!searchQuery.trim() && (
+            {!searchQuery.trim() && filteredTodosByTags.length === 0 && (
               <p className="text-center text-white/50 py-4">
                 Start typing to search your todos
               </p>
