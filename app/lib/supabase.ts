@@ -14,6 +14,7 @@ export interface Todo {
   id: string;
   owner_id: string;  // Clerk user ID (text format)
   text: string;
+  list_name: string;
   list_id: string;
   due_date: string;  // Date stored as ISO string
   due_time: string;  // Time stored as string (HH:mm:ss)
@@ -21,6 +22,14 @@ export interface Todo {
   created_at: string;
   updated_at: string;
   tags: string[];
+}
+
+export interface List {
+  id: string;
+  owner_id: string;  // Clerk user ID (text format)
+  name: string;
+  created_at: string;
+  icon: string;
 }
 
 export async function addTodo(todo: Omit<Todo, 'id' | 'created_at' | 'updated_at'>) {
@@ -59,6 +68,36 @@ export async function addTodo(todo: Omit<Todo, 'id' | 'created_at' | 'updated_at
   }
 }
 
+export async function addList(list: Omit<List, 'id' | 'created_at'>) {
+  console.log('Adding list with data:', list);
+  
+  try {
+    // Validate owner_id
+    if (!list.owner_id) {
+      throw new Error('Owner ID is required');
+    }
+    
+    //console.log('Formatted todo data:', formattedTodo);
+
+    const { data, error } = await supabase
+      .from('lists')
+      .insert([list])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw new Error(`Failed to add list: ${error.message}`);
+    }
+
+    console.log('Successfully added list:', data);
+    return data;
+  } catch (error) {
+    console.error('Error in addList:', error);
+    throw error;
+  }
+}
+
 export async function getTodos(owner_id: string) {
   console.log('Fetching todos for owner:', owner_id);
   
@@ -84,6 +123,62 @@ export async function getTodos(owner_id: string) {
     return data || [];  // Return empty array if no todos found
   } catch (error) {
     console.error('Error in getTodos:', error);
+    throw error;
+  }
+}
+
+export async function getLists(owner_id: string) {
+  console.log('Fetching lists for owner:', owner_id);
+  
+  try {
+    // Validate owner_id
+    if (!owner_id) {
+      throw new Error('Owner ID is required');
+    }
+
+    const { data, error } = await supabase
+      .from('lists')
+      .select('*')
+      .eq('owner_id', owner_id);
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw new Error(`Failed to fetch lists: ${error.message}`);
+    }
+
+    console.log('Successfully fetched lists:', data);
+    return data || [];  // Return empty array if no lists found
+  } catch (error) {
+    console.error('Error in getLists:', error);
+    throw error;
+  }
+}
+
+export async function getListByName(owner_id: string, list_name: string) {
+  console.log('Fetching lists for owner:', owner_id);
+  
+  try {
+    // Validate owner_id
+    if (!owner_id) {
+      throw new Error('Owner ID is required');
+    }
+
+    const { data, error } = await supabase
+      .from('lists')
+      .select('*')
+      .eq('owner_id', owner_id)
+      .eq('name', list_name)
+      .limit(1);
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw new Error(`Failed to fetch lists: ${error.message}`);
+    }
+
+    console.log('Successfully fetched lists:', data);
+    return data[0] || null;  // Return null if no list found
+  } catch (error) {
+    console.error('Error in getLists:', error);
     throw error;
   }
 }
@@ -151,6 +246,32 @@ export async function deleteTodo(id: string) {
     console.log('Successfully deleted todo:', id);
   } catch (error) {
     console.error('Error in deleteTodo:', error);
+    throw error;
+  }
+} 
+
+export async function deleteList(id: string) {
+  console.log('Deleting list:', id);
+  
+  try {
+    // Validate id
+    if (!id) {
+      throw new Error('Todo ID is required');
+    }
+
+    const { error } = await supabase
+      .from('lists')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw new Error(`Failed to delete list: ${error.message}`);
+    }
+
+    console.log('Successfully deleted list:', id);
+  } catch (error) {
+    console.error('Error in deleteList:', error);
     throw error;
   }
 } 

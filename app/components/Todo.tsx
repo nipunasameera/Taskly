@@ -8,14 +8,8 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import AddTodoDialog from './AddTodoDialog';
 import { useUser } from '@clerk/nextjs';
-import { addTodo, getTodos, updateTodo, deleteTodo, type Todo as DBTodo } from '@/app/lib/supabase';
+import { addTodo, getTodos, updateTodo, deleteTodo, type Todo as DBTodo, type List as DBList, getLists , getListByName} from '@/app/lib/supabase';
 
-// Define the TodoList interface
-interface TodoList {
-  id: string;
-  name: string;
-  icon: 'personal' | 'work';
-}
 
 // Define the Tag interface
 interface Tag {
@@ -23,12 +17,6 @@ interface Tag {
   name: string;
   color: string;
 }
-
-// Define the default lists
-const defaultLists: TodoList[] = [
-  { id: 'personal', name: 'Personal', icon: 'personal' },
-  { id: 'work', name: 'Work', icon: 'work' },
-];
 
 // Define the default tags
 const defaultTags: Tag[] = [
@@ -46,7 +34,7 @@ interface GroupedTodos {
 
 export default function TodoList() {
   const [todos, setTodos] = React.useState<DBTodo[]>([]);
-  const [lists] = React.useState<TodoList[]>(defaultLists);
+  const [lists, setLists] = React.useState<DBList[]>([]);
   const [tags] = React.useState<Tag[]>(defaultTags);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
@@ -69,6 +57,32 @@ export default function TodoList() {
     }
   }, [user?.id]);
 
+  // Fetch lists on component mount and when user changes
+  React.useEffect(() => {
+    if (user?.id) {
+      getLists(user.id)
+        .then(setLists)
+        .catch((error) => {
+          console.error('Failed to fetch lists:', error);
+          // You might want to show an error message to the user here
+        });
+    }
+  }, [user?.id]);
+
+  // Function to refresh lists
+  const refreshLists = async () => {
+    if (!user?.id) {
+      console.error('No user ID available');
+      return;
+    }
+    try {
+      const updatedLists = await getLists(user.id);
+      setLists(updatedLists);
+    } catch (error) {
+      console.error('Failed to refresh lists:', error);
+    }
+  };
+
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -79,17 +93,19 @@ export default function TodoList() {
   };
 
   // Handle adding a new todo
-  const handleAddTodo = async (data: { text: string; dueDate: string; dueTime: string; listId: string; tags: string[] }) => {
+  const handleAddTodo = async (data: { text: string; dueDate: string; dueTime: string; listName: string; tags: string[] }) => {
     if (!user?.id) {
       console.error('No user ID available');
       return;
     }
 
+    const list = await getListByName(user.id, data.listName);
+
     try {
       console.log('Adding todo with data:', {
         owner_id: user.id,
         text: data.text,
-        list_id: data.listId,
+        list_id: data.listName,
         due_date: data.dueDate,
         due_time: data.dueTime,
         completed: false
@@ -98,7 +114,8 @@ export default function TodoList() {
       const newTodo = await addTodo({
         owner_id: user.id,
         text: data.text,
-        list_id: data.listId,
+        list_name: data.listName,
+        list_id: list?.id,
         due_date: data.dueDate,
         due_time: data.dueTime,
         completed: false,
@@ -218,10 +235,6 @@ export default function TodoList() {
       case 'completed':
         filtered = todos.filter((todo) => todo.completed);
         break;
-      case 'personal':
-      case 'work':
-        filtered = todos.filter((todo) => todo.list_id === activeTab);
-        break;
       case 'Priority_1':
       case 'Priority_2':
       case 'Priority_3':
@@ -230,6 +243,12 @@ export default function TodoList() {
       case 'all':
       default:
         filtered = todos;  // Show all todos for 'all' tab
+        lists.forEach(element => {
+          if (element.name === activeTab) {
+            
+            filtered = todos.filter((todo) => todo.list_name === element.name);
+          }
+        });
     }
 
     return groupTodosByDate(filtered);
@@ -258,6 +277,7 @@ export default function TodoList() {
         onClose={() => setIsSidebarOpen(false)}
         lists={lists}
         tags={tags}
+        onListCreated={refreshLists}
       />
       
       <main
@@ -265,7 +285,8 @@ export default function TodoList() {
           isSidebarOpen ? 'ml-64' : 'ml-0'
         }`}
       >
-        <div className="max-w-3xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 flex flex-col justify-center p-6">
+        {/* <div className="max-w-3xl mx-auto p-6"></div> */}
+        <div className={`max-w-3xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 flex flex-col justify-center p-6`}>
           <div className="mb-8 text-white text-center">
             <h2 className="lg:text-3xl sm:text-2xl font-semibold">
               Welcome, {user?.firstName || 'User'} | {formatDate(new Date())}
@@ -312,7 +333,7 @@ export default function TodoList() {
                           {todo.text}
                         </p>
                         <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/70">
-                          {lists.find(list => list.id === todo.list_id)?.name}
+                          {lists.find(list => list.name === todo.list_name)?.name}
                         </span>
                       </div>
                       <div className="flex items-center gap-4 mt-1">
