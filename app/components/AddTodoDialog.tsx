@@ -4,13 +4,7 @@ import * as Select from '@radix-ui/react-select';
 import { X, ChevronDown, Check } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '@/app/lib/utils';
-
-// A dialog component for adding a new todo
-interface TodoList {
-  id: string;
-  name: string;
-  icon: 'personal' | 'work';
-}
+import { type List as DBList } from '@/app/lib/supabase';
 
 // Define the Tag interface
 interface Tag {
@@ -29,8 +23,8 @@ const defaultTags: Tag[] = [
 interface AddTodoDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { text: string; dueDate: string; dueTime: string; listId: string; tags: string[] }) => void;
-  lists: TodoList[];
+  onSubmit: (data: { text: string; dueDate: string; dueTime: string; listName: string; tags: string[] }) => void;
+  lists:  DBList[];
 }
 
 // The AddTodoDialog component
@@ -38,17 +32,18 @@ export default function AddTodoDialog({ isOpen, onClose, onSubmit, lists }: AddT
   const [text, setText] = React.useState('');
   const [dueDate, setDueDate] = React.useState('');
   const [dueTime, setDueTime] = React.useState('');
-  const [selectedList, setSelectedList] = React.useState(lists[0]?.id || '');
+  const [selectedList, setSelectedList] = React.useState('');
   const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ text, dueDate, dueTime, listId: selectedList, tags: selectedTags });
+    onSubmit({ text, dueDate, dueTime, listName: selectedList, tags: selectedTags });
     setText('');
     setDueDate('');
     setDueTime('');
-    setSelectedList(lists[0]?.id || '');
+    setSelectedList('');
+    setSelectedTags([]);
     onClose();
   };
 
@@ -89,12 +84,12 @@ export default function AddTodoDialog({ isOpen, onClose, onSubmit, lists }: AddT
               <label className="block text-sm">
                 List
               </label>
-              <Select.Root value={selectedList} onValueChange={setSelectedList}>
+              <Select.Root value={'Select a list'} onValueChange={setSelectedList}>
                 <Select.Trigger
                   className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-white/50 text-white flex items-center justify-between"
                 >
                   <Select.Value>
-                    {lists.find(list => list.id === selectedList)?.name || 'Select a list'}
+                    {lists.find(list => list.name === selectedList)?.name || 'Select a list'}
                   </Select.Value>
                   <Select.Icon>
                     <ChevronDown className="h-4 w-4 opacity-50" />
@@ -107,7 +102,7 @@ export default function AddTodoDialog({ isOpen, onClose, onSubmit, lists }: AddT
                       {lists.map((list) => (
                         <Select.Item
                           key={list.id}
-                          value={list.id}
+                          value={list.name}
                           className="px-3 py-2 text-white hover:bg-white/10 focus:bg-white/20 focus:outline-none cursor-pointer flex items-center gap-2"
                         >
                           <Select.ItemText>{list.name}</Select.ItemText>
