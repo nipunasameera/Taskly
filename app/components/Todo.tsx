@@ -10,7 +10,6 @@ import AddTodoDialog from './AddTodoDialog';
 import { useUser } from '@clerk/nextjs';
 import { addTodo, getTodos, updateTodo, deleteTodo, type Todo as DBTodo, type List as DBList, getLists , getListByName} from '@/app/lib/supabase';
 
-
 // Define the Tag interface
 interface Tag {
   id: string;
@@ -262,6 +261,11 @@ export default function TodoList() {
     }
   };
 
+  const handleRefreshLists = () => {
+    setIsDialogOpen(true);
+    refreshLists();
+  };
+
   return (
     
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600">
@@ -294,7 +298,7 @@ export default function TodoList() {
           </div>
           <div className="mb-6">
             <Button 
-              onClick={() => setIsDialogOpen(true)}
+              onClick={handleRefreshLists}
               size="default"
               className="bg-white/20 hover:bg-white/30 text-white border border-white/10 backdrop-blur-sm w-full"
             >

@@ -146,7 +146,8 @@ export default function Sidebar({ isOpen, activeTab, onTabChange, onClose, tags,
             </div>
             
             <ul className="space-y-2 mt-4">
-              {lists.map((list) => {
+              {
+              lists.map((list) => {
                 const Icon = getListIcon(list.icon);
                 return (
                   <li key={list.id}>
