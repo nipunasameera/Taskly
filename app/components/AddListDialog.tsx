@@ -13,7 +13,7 @@ interface AddListDialogProps {
 // The AddListDialog component
 export default function AddListDialog({ isOpen, onClose, onSubmit }: AddListDialogProps) {
   const [listName, setListName] = React.useState('');
-  const [icon, setIcon] = React.useState('listToDo');
+  const [icon] = React.useState('listToDo');
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
